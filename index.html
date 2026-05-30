@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dividend Passive Income Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0c1220;
+      --navy-mid:   #151d2e;
+      --navy-light: #1e293b;
+      --gold:       #c9a227;
+      --gold-bright:#e2bc4a;
+      --gold-dim:   rgba(201, 162, 39, 0.15);
+      --emerald:    #047857;
+      --emerald-bright: #10b981;
+      --cream:      #f7f4ef;
+      --cream-dark: #ede8df;
+      --white:      #ffffff;
+      --gray-500:   #6b7280;
+      --gray-700:   #374151;
+      --charcoal:   #111827;
+      --shadow:     0 2px 0 rgba(12, 18, 32, 0.06), 0 8px 24px rgba(12, 18, 32, 0.08);
+      --shadow-lg:  0 2px 0 rgba(201, 162, 39, 0.2), 0 12px 32px rgba(12, 18, 32, 0.12);
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--cream);
+      background-image:
+        linear-gradient(var(--cream-dark) 1px, transparent 1px),
+        linear-gradient(90deg, var(--cream-dark) 1px, transparent 1px);
+      background-size: 48px 48px;
+      color: var(--gray-700);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    .header-wrap {
+      position: relative;
+      background: var(--navy);
+      padding: 2.75rem 1.5rem 2.5rem;
+      text-align: center;
+      border-bottom: 3px solid var(--gold);
+    }
+
+    .header-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 50%, var(--gold) 100%);
+      background-size: 200% 100%;
+      animation: goldShimmer 4s linear infinite;
+    }
+
+    @keyframes goldShimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .header-accent {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 3px;
+      background: var(--gold-bright);
+      animation: lineGrow 1.2s ease forwards 0.3s;
+    }
+
+    @keyframes lineGrow {
+      to { width: 100%; }
+    }
+
+    .header-content {
+      position: relative;
+      max-width: 640px;
+      margin: 0 auto;
+      animation: fadeUp 0.7s ease backwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-badge {
+      display: inline-block;
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold-bright);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.45rem 1rem;
+      margin-bottom: 1rem;
+      animation: fadeUp 0.7s ease backwards 0.15s;
+    }
+
+    .header-wrap h1 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      line-height: 1.15;
+      animation: fadeUp 0.7s ease backwards 0.25s;
+    }
+
+    .header-wrap h1 span {
+      color: var(--gold-bright);
+    }
+
+    .header-wrap p {
+      margin-top: 0.75rem;
+      font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+      font-weight: 400;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.6;
+      animation: fadeUp 0.7s ease backwards 0.35s;
+    }
+
+    /* Main */
+    main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    .section-reveal {
+      animation: fadeUp 0.6s ease backwards;
+    }
+
+    .section-reveal:nth-child(1) { animation-delay: 0.4s; }
+    .section-reveal:nth-child(2) { animation-delay: 0.55s; }
+    .section-reveal:nth-child(3) { animation-delay: 0.7s; }
+
+    /* Controls */
+    .controls {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-top: 3px solid var(--gold);
+      box-shadow: var(--shadow);
+      padding: 1.75rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .controls-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+
+    .control-group {
+      margin-bottom: 1.75rem;
+    }
+
+    .control-group:last-child { margin-bottom: 0; }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .control-label span:first-child {
+      font-weight: 600;
+      color: var(--navy);
+      font-size: 0.95rem;
+    }
+
+    .control-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .control-value.bump {
+      animation: valueBump 0.3s ease;
+    }
+
+    @keyframes valueBump {
+      0%   { transform: scale(1); color: var(--gold); }
+      50%  { transform: scale(1.06); color: var(--emerald-bright); }
+      100% { transform: scale(1); color: var(--gold); }
+    }
+
+    .slider-wrap {
+      position: relative;
+      padding: 0.35rem 0;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 0;
+      background: linear-gradient(to right, var(--gold) var(--pct, 50%), var(--cream-dark) var(--pct, 50%));
+      outline: none;
+      cursor: pointer;
+      transition: box-shadow 0.25s;
+    }
+
+    input[type="range"]:active,
+    input[type="range"]:focus-visible {
+      box-shadow: 0 0 0 3px var(--gold-dim);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 22px;
+      border-radius: 0;
+      background: var(--navy);
+      border: 2px solid var(--gold);
+      box-shadow: 0 2px 8px rgba(12, 18, 32, 0.25);
+      cursor: grab;
+      transition: transform 0.15s, background 0.15s, border-color 0.15s;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scaleY(1.15);
+      background: var(--gold);
+      border-color: var(--navy);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: var(--gold);
+      border-color: var(--navy);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 22px;
+      border-radius: 0;
+      background: var(--navy);
+      border: 2px solid var(--gold);
+      box-shadow: 0 2px 8px rgba(12, 18, 32, 0.25);
+      cursor: grab;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 0;
+      background: var(--cream-dark);
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 0.35rem;
+    }
+
+    /* Summary Cards */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: var(--white);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.5rem 1.35rem 1.75rem;
+      border: 1px solid var(--cream-dark);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s;
+      animation: cardSlide 0.5s ease backwards;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.5s; }
+    .card:nth-child(2) { animation-delay: 0.6s; }
+    .card:nth-child(3) { animation-delay: 0.7s; }
+    .card:nth-child(4) { animation-delay: 0.8s; }
+
+    @keyframes cardSlide {
+      from { opacity: 0; transform: translateX(-12px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent, var(--gold));
+      transform: scaleY(0);
+      transform-origin: bottom;
+      animation: barGrow 0.6s ease forwards;
+    }
+
+    .card:nth-child(1)::before { animation-delay: 0.6s; --accent: var(--gold); }
+    .card:nth-child(2)::before { animation-delay: 0.7s; --accent: var(--navy-light); }
+    .card:nth-child(3)::before { animation-delay: 0.8s; --accent: var(--emerald); }
+    .card:nth-child(4)::before { animation-delay: 0.9s; --accent: var(--emerald-bright); }
+
+    @keyframes barGrow {
+      to { transform: scaleY(1); }
+    }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--gold);
+    }
+
+    .card-icon {
+      font-size: 1.35rem;
+      margin-bottom: 0.5rem;
+      line-height: 1;
+    }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-500);
+      margin-bottom: 0.4rem;
+    }
+
+    .card-value {
+      font-size: clamp(1.3rem, 3vw, 1.85rem);
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .card-value.counting {
+      color: var(--gold);
+    }
+
+    .card:nth-child(3) .card-value { color: var(--emerald); }
+    .card:nth-child(4) .card-value { color: var(--gold); }
+
+    /* Chart */
+    .chart-container {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-top: 3px solid var(--emerald);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+    }
+
+    .chart-container h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--cream-dark);
+    }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      height: clamp(280px, 50vw, 400px);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--navy);
+      color: var(--white);
+      text-align: center;
+      padding: 2rem 1.5rem;
+      margin-top: auto;
+      border-top: 3px solid var(--gold);
+      animation: fadeUp 0.6s ease backwards 0.9s;
+    }
+
+    footer p {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .bmc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--gold);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.85rem 1.75rem;
+      border: 2px solid var(--gold-bright);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 0 var(--navy-mid);
+    }
+
+    .bmc-btn:hover {
+      transform: translateY(-2px);
+      background: var(--gold-bright);
+      box-shadow: 0 6px 0 var(--navy-mid);
+    }
+
+    .bmc-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--navy-mid);
+    }
+
+    .bmc-emoji {
+      font-size: 1.35rem;
+      line-height: 1;
+      display: inline-block;
+      animation: coffeeSteam 2.5s ease-in-out infinite;
+    }
+
+    @keyframes coffeeSteam {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-3px); }
+    }
+
+    @media (max-width: 480px) {
+      .header-wrap { padding: 2rem 1rem 2rem; }
+      main { padding: 1.5rem 1rem 2rem; }
+      .controls { padding: 1.25rem 1rem; }
+      .card { padding: 1rem 1.15rem; }
+      .chart-container { padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-wrap">
+    <div class="header-accent" aria-hidden="true"></div>
+    <div class="header-content">
+      <div class="header-badge">Wealth Planner</div>
+      <h1>Dividend <span>Passive Income</span> Calculator</h1>
+      <p>Project your portfolio growth and monthly dividend income over time</p>
+    </div>
+  </div>
+
+  <main>
+    <section class="controls section-reveal" aria-label="Investment parameters">
+      <div class="controls-title">Adjust your plan</div>
+      <div class="control-group">
+        <div class="control-label">
+          <span>Monthly Investment</span>
+          <span class="control-value" id="monthlyDisplay">$500</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="monthly" min="50" max="5000" step="50" value="500">
+        </div>
+        <div class="range-labels"><span>$50</span><span>$5,000</span></div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Annual Return Rate</span>
+          <span class="control-value" id="rateDisplay">7%</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="rate" min="1" max="20" step="0.5" value="7">
+        </div>
+        <div class="range-labels"><span>1%</span><span>20%</span></div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Investment Period</span>
+          <span class="control-value" id="yearsDisplay">20 years</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="years" min="1" max="40" step="1" value="20">
+        </div>
+        <div class="range-labels"><span>1 yr</span><span>40 yrs</span></div>
+      </div>
+    </section>
+
+    <section class="cards section-reveal" aria-label="Summary">
+      <div class="card">
+        <div class="card-icon">📈</div>
+        <div class="card-label">Total Portfolio Value</div>
+        <div class="card-value" id="portfolioValue">—</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏦</div>
+        <div class="card-label">Total Invested</div>
+        <div class="card-value" id="totalInvested">—</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🚀</div>
+        <div class="card-label">Total Growth</div>
+        <div class="card-value" id="totalGrowth">—</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💵</div>
+        <div class="card-label">Monthly Passive Income</div>
+        <div class="card-value" id="monthlyIncome">—</div>
+      </div>
+    </section>
+
+    <section class="chart-container section-reveal">
+      <h2>Portfolio Growth vs. Amount Invested</h2>
+      <div class="chart-wrapper">
+        <canvas id="growthChart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>If this tool helped you, buy me a coffee!</p>
+    <a class="bmc-btn" href="https://buymeacoffee.com/daylen" target="_blank" rel="noopener noreferrer">
+      <span class="bmc-emoji" aria-hidden="true">☕</span>
+      Buy Me a Coffee
+    </a>
+  </footer>
+
+  <script>
+    const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+    const fmtDec = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+
+    const monthlySlider = document.getElementById('monthly');
+    const rateSlider = document.getElementById('rate');
+    const yearsSlider = document.getElementById('years');
+
+    function calculate(monthly, annualRate, years) {
+      const monthlyRate = Math.pow(1 + annualRate / 100, 1 / 12) - 1;
+      const labels = [];
+      const portfolioData = [];
+      const investedData = [];
+
+      let balance = 0;
+      const totalMonths = years * 12;
+
+      for (let m = 1; m <= totalMonths; m++) {
+        balance = balance * (1 + monthlyRate) + monthly;
+        if (m % 12 === 0) {
+          const yr = m / 12;
+          labels.push('Year ' + yr);
+          portfolioData.push(Math.round(balance));
+          investedData.push(monthly * m);
+        }
+      }
+
+      const totalInvested = monthly * totalMonths;
+      const totalGrowth = balance - totalInvested;
+      const monthlyPassiveIncome = balance * (annualRate / 100) / 12;
+
+      return {
+        labels,
+        portfolioData,
+        investedData,
+        portfolioValue: balance,
+        totalInvested,
+        totalGrowth,
+        monthlyPassiveIncome
+      };
+    }
+
+    let chart;
+
+    function initChart() {
+      const ctx = document.getElementById('growthChart').getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Portfolio Value',
+              data: [],
+              backgroundColor: 'rgba(201, 162, 39, 0.9)',
+              borderColor: '#c9a227',
+              borderWidth: 1,
+              borderRadius: 0,
+              borderSkipped: false
+            },
+            {
+              label: 'Amount Invested',
+              data: [],
+              backgroundColor: 'rgba(30, 41, 59, 0.75)',
+              borderColor: '#1e293b',
+              borderWidth: 1,
+              borderRadius: 0,
+              borderSkipped: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 700, easing: 'easeOutQuart' },
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                usePointStyle: true,
+                pointStyle: 'rect',
+                padding: 16,
+                font: { size: 12, weight: '600' },
+                color: '#374151'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: ctx => ctx.dataset.label + ': ' + fmt.format(ctx.raw)
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { color: '#ede8df' },
+              ticks: { maxRotation: 45, font: { size: 11 }, color: '#6b7280' }
+            },
+            y: {
+              beginAtZero: true,
+              border: { color: '#ede8df' },
+              grid: { color: '#f7f4ef' },
+              ticks: {
+                color: '#6b7280',
+                callback: v => '$' + (v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'K' : v)
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function setSliderFill(slider) {
+      const min = +slider.min, max = +slider.max, val = +slider.value;
+      slider.style.setProperty('--pct', ((val - min) / (max - min) * 100) + '%');
+    }
+
+    const displayState = {
+      portfolioValue: 0,
+      totalInvested: 0,
+      totalGrowth: 0,
+      monthlyIncome: 0
+    };
+
+    let animators = {};
+
+    function animateValue(id, target, decimals) {
+      const el = document.getElementById(id);
+      const start = displayState[id];
+      const diff = target - start;
+      if (Math.abs(diff) < 1) {
+        displayState[id] = target;
+        el.textContent = decimals ? fmtDec.format(target) : fmt.format(target);
+        el.classList.remove('counting');
+        return;
+      }
+
+      el.classList.add('counting');
+      const duration = 400;
+      const t0 = performance.now();
+
+      if (animators[id]) cancelAnimationFrame(animators[id]);
+
+      function step(now) {
+        const t = Math.min((now - t0) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const current = start + diff * eased;
+        displayState[id] = current;
+        el.textContent = decimals ? fmtDec.format(current) : fmt.format(current);
+        if (t < 1) {
+          animators[id] = requestAnimationFrame(step);
+        } else {
+          displayState[id] = target;
+          el.textContent = decimals ? fmtDec.format(target) : fmt.format(target);
+          el.classList.remove('counting');
+          delete animators[id];
+        }
+      }
+
+      animators[id] = requestAnimationFrame(step);
+    }
+
+    function bump(el) {
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+    }
+
+    function update(animate) {
+      const monthly = +monthlySlider.value;
+      const rate = +rateSlider.value;
+      const years = +yearsSlider.value;
+
+      [monthlySlider, rateSlider, yearsSlider].forEach(setSliderFill);
+
+      document.getElementById('monthlyDisplay').textContent = fmt.format(monthly);
+      document.getElementById('rateDisplay').textContent = rate + '%';
+      document.getElementById('yearsDisplay').textContent = years + (years === 1 ? ' year' : ' years');
+
+      const result = calculate(monthly, rate, years);
+
+      if (animate) {
+        animateValue('portfolioValue', result.portfolioValue, false);
+        animateValue('totalInvested', result.totalInvested, false);
+        animateValue('totalGrowth', result.totalGrowth, false);
+        animateValue('monthlyIncome', result.monthlyPassiveIncome, true);
+      } else {
+        displayState.portfolioValue = result.portfolioValue;
+        displayState.totalInvested = result.totalInvested;
+        displayState.totalGrowth = result.totalGrowth;
+        displayState.monthlyIncome = result.monthlyPassiveIncome;
+        document.getElementById('portfolioValue').textContent = fmt.format(result.portfolioValue);
+        document.getElementById('totalInvested').textContent = fmt.format(result.totalInvested);
+        document.getElementById('totalGrowth').textContent = fmt.format(result.totalGrowth);
+        document.getElementById('monthlyIncome').textContent = fmtDec.format(result.monthlyPassiveIncome);
+      }
+
+      chart.data.labels = result.labels;
+      chart.data.datasets[0].data = result.portfolioData;
+      chart.data.datasets[1].data = result.investedData;
+      chart.update(animate ? undefined : 'none');
+    }
+
+    initChart();
+    update(false);
+
+    [monthlySlider, rateSlider, yearsSlider].forEach(el => {
+      el.addEventListener('input', () => {
+        bump(el.closest('.control-group').querySelector('.control-value'));
+        update(true);
+      });
+    });
+  </script>
+</body>
+</html>
