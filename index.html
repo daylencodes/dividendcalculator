@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dividend Passive Income Calculator — Plan Your Dividend Journey</title>
+  <meta name="description" content="Free dividend passive income calculator. Project portfolio growth, monthly dividend income, and year-by-year breakdown. Works for Singapore (SGD), US (USD), and more.">
+  <meta name="keywords" content="dividend calculator, passive income calculator, dividend calculator Singapore, SGD dividend, portfolio growth, dividend yield">
+  <meta property="og:title" content="Dividend Passive Income Calculator">
+  <meta property="og:description" content="See your dividend journey year by year. Calculate portfolio growth and monthly passive income with custom yield and return rates.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0c1220;
+      --navy-mid:   #151d2e;
+      --navy-light: #1e293b;
+      --gold:       #c9a227;
+      --gold-bright:#e2bc4a;
+      --gold-dim:   rgba(201, 162, 39, 0.15);
+      --emerald:    #047857;
+      --emerald-bright: #10b981;
+      --cream:      #f7f4ef;
+      --cream-dark: #ede8df;
+      --white:      #ffffff;
+      --gray-500:   #6b7280;
+      --gray-700:   #374151;
+      --text:       #374151;
+      --bg:         #f7f4ef;
+      --bg-grid:    #ede8df;
+      --surface:    #ffffff;
+      --border:     #ede8df;
+      --shadow:     0 2px 0 rgba(12, 18, 32, 0.06), 0 8px 24px rgba(12, 18, 32, 0.08);
+      --shadow-lg:  0 2px 0 rgba(201, 162, 39, 0.2), 0 12px 32px rgba(12, 18, 32, 0.12);
+    }
+
+    [data-theme="dark"] {
+      --navy:       #e2e8f0;
+      --navy-mid:   #0f172a;
+      --navy-light: #cbd5e1;
+      --cream:      #0f172a;
+      --cream-dark: #1e293b;
+      --white:      #1e293b;
+      --gray-500:   #94a3b8;
+      --gray-700:   #e2e8f0;
+      --text:       #e2e8f0;
+      --bg:         #0c1220;
+      --bg-grid:    #1e293b;
+      --surface:    #151d2e;
+      --border:     #334155;
+      --shadow:     0 2px 0 rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.4);
+      --shadow-lg:  0 2px 0 rgba(201,162,39,0.3), 0 12px 32px rgba(0,0,0,0.5);
+      --gold-dim:   rgba(201, 162, 39, 0.25);
+    }
+
+    [data-theme="dark"] .header-wrap { background: #060a12; }
+    [data-theme="dark"] .header-wrap h1 { color: #f8fafc; }
+    [data-theme="dark"] .header-wrap p { color: rgba(248,250,252,0.7); }
+    [data-theme="dark"] footer { background: #060a12; }
+    [data-theme="dark"] .toolbar { background: #151d2e; border-color: #334155; }
+    [data-theme="dark"] .toolbar select,
+    [data-theme="dark"] .toolbar-btn { background: #0c1220; color: #e2e8f0; border-color: #334155; }
+    [data-theme="dark"] .breakdown-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.03); }
+    [data-theme="dark"] .breakdown-table tbody tr:hover { background: rgba(201,162,39,0.08); }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(var(--bg-grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+      background-size: 48px 48px;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .header-wrap {
+      position: relative;
+      background: var(--navy-mid);
+      background: #0c1220;
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      border-bottom: 3px solid var(--gold);
+    }
+
+    .header-wrap::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 50%, var(--gold) 100%);
+      background-size: 200% 100%;
+      animation: goldShimmer 4s linear infinite;
+    }
+
+    @keyframes goldShimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .header-content {
+      position: relative;
+      max-width: 640px;
+      margin: 0 auto;
+      animation: fadeUp 0.7s ease backwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-badge {
+      display: inline-block;
+      border: 1px solid var(--gold);
+      color: var(--gold-bright);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.45rem 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .header-wrap h1 {
+      font-size: clamp(1.75rem, 5vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.15;
+    }
+
+    .header-wrap h1 span { color: var(--gold-bright); }
+
+    .header-wrap p {
+      margin-top: 0.75rem;
+      font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+      color: rgba(255,255,255,0.75);
+    }
+
+    main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--gold);
+      box-shadow: var(--shadow);
+      padding: 0.75rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .toolbar label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+    }
+
+    .toolbar select {
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      min-height: 40px;
+    }
+
+    .toolbar-btn {
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.5rem 0.85rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      min-height: 40px;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .toolbar-btn:hover { border-color: var(--gold); background: var(--gold-dim); }
+    .toolbar-btn:active { transform: scale(0.97); }
+    .toolbar-btn--gold { background: var(--gold); color: #0c1220; border-color: var(--gold-bright); }
+    .toolbar-btn--gold:hover { background: var(--gold-bright); }
+
+    .section-reveal { animation: fadeUp 0.6s ease backwards; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 1.75rem 1.5rem;
+      margin-bottom: 1.5rem;
+      transition: background 0.3s, border-color 0.3s;
+    }
+
+    .panel--gold { border-top: 3px solid var(--gold); }
+    .panel--emerald { border-top: 3px solid var(--emerald); }
+
+    .panel-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .panel-title--emerald { color: var(--emerald); }
+
+    .control-group { margin-bottom: 1.75rem; }
+    .control-group:last-child { margin-bottom: 0; }
+
+    .control-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .control-label-left {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 600;
+      color: var(--navy);
+      font-size: 0.95rem;
+    }
+
+    [data-theme="dark"] .control-label-left { color: var(--navy-light); }
+
+    .control-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .control-value.bump { animation: valueBump 0.3s ease; }
+
+    @keyframes valueBump {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.06); color: var(--emerald-bright); }
+      100% { transform: scale(1); }
+    }
+
+    .info-tip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      color: var(--gold);
+      border: 1.5px solid var(--gold);
+      cursor: help;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .info-tip::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) scale(0.95);
+      width: max-content;
+      max-width: 240px;
+      padding: 0.6rem 0.75rem;
+      background: #0c1220;
+      color: #f8fafc;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1.45;
+      text-transform: none;
+      letter-spacing: 0;
+      border: 1px solid var(--gold);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 50;
+      text-align: left;
+    }
+
+    .info-tip:hover::after,
+    .info-tip:focus-visible::after {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .slider-wrap { padding: 0.5rem 0; touch-action: none; }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: linear-gradient(to right, var(--gold) var(--pct, 50%), var(--cream-dark) var(--pct, 50%));
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]:focus-visible { box-shadow: 0 0 0 3px var(--gold-dim); }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 28px;
+      background: #0c1220;
+      border: 2px solid var(--gold);
+      cursor: grab;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      background: var(--gold);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 28px;
+      background: #0c1220;
+      border: 2px solid var(--gold);
+      cursor: grab;
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      background: var(--cream-dark);
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      margin-top: 0.35rem;
+    }
+
+    .controls-footer {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .reset-btn {
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--gray-500);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .reset-btn:hover { color: var(--gold); border-color: var(--gold); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.5rem 1.35rem 1.75rem;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 4px;
+      background: var(--accent, var(--gold));
+    }
+
+    .card:nth-child(1) { --accent: var(--gold); }
+    .card:nth-child(2) { --accent: var(--navy-light); }
+    .card:nth-child(3) { --accent: var(--emerald); }
+    .card:nth-child(4) { --accent: var(--emerald-bright); }
+
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--gold);
+    }
+
+    .card-icon { font-size: 1.35rem; margin-bottom: 0.5rem; }
+
+    .card-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gray-500);
+      margin-bottom: 0.4rem;
+    }
+
+    .card-value {
+      font-size: clamp(1.3rem, 3vw, 1.85rem);
+      font-weight: 800;
+      color: var(--navy);
+      font-variant-numeric: tabular-nums;
+    }
+
+    [data-theme="dark"] .card-value { color: #f1f5f9; }
+
+    .card-value.counting { color: var(--gold); }
+    .card:nth-child(3) .card-value { color: var(--emerald); }
+    .card:nth-child(4) .card-value { color: var(--gold); }
+
+    .chart-wrapper {
+      position: relative;
+      width: 100%;
+      height: clamp(260px, 45vw, 380px);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 0 -0.25rem;
+      padding: 0 0.25rem;
+    }
+
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      min-width: 520px;
+    }
+
+    .breakdown-table th {
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-500);
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--gold);
+      white-space: nowrap;
+    }
+
+    .breakdown-table th:not(:first-child),
+    .breakdown-table td:not(:first-child) { text-align: right; }
+
+    .breakdown-table td {
+      padding: 0.7rem 1rem;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .breakdown-table tbody tr:nth-child(even) { background: rgba(201,162,39,0.04); }
+    .breakdown-table tbody tr:hover { background: rgba(201,162,39,0.08); }
+
+    .breakdown-table .col-income { color: var(--gold); font-weight: 700; }
+    .breakdown-table .col-growth { color: var(--emerald); font-weight: 600; }
+
+    footer {
+      background: #0c1220;
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1.5rem;
+      margin-top: auto;
+      border-top: 3px solid var(--gold);
+    }
+
+    footer p {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      color: rgba(255,255,255,0.8);
+    }
+
+    .bmc-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--gold);
+      color: #0c1220;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.85rem 1.75rem;
+      border: 2px solid var(--gold-bright);
+      text-decoration: none;
+      box-shadow: 0 4px 0 #151d2e;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .bmc-btn:hover { transform: translateY(-2px); background: var(--gold-bright); }
+
+    .bmc-emoji {
+      font-size: 1.35rem;
+      animation: coffeeSteam 2.5s ease-in-out infinite;
+    }
+
+    @keyframes coffeeSteam {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-3px); }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #0c1220;
+      color: #fff;
+      border: 1px solid var(--gold);
+      padding: 0.75rem 1.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      z-index: 999;
+      opacity: 0;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 600px) {
+      .header-wrap { padding: 2rem 1rem 1.75rem; }
+      main { padding: 1rem 0.75rem 2rem; }
+      .panel { padding: 1.25rem 1rem; }
+      .toolbar { padding: 0.65rem 0.75rem; }
+      .toolbar-group { width: 100%; }
+      .toolbar select, .toolbar-btn { flex: 1; min-width: 0; font-size: 0.8rem; }
+      input[type="range"]::-webkit-slider-thumb {
+        width: 28px;
+        height: 36px;
+      }
+      input[type="range"]::-moz-range-thumb {
+        width: 28px;
+        height: 36px;
+      }
+      .info-tip::after {
+        left: auto;
+        right: 0;
+        transform: translateX(0) scale(0.95);
+        max-width: 200px;
+      }
+      .info-tip:hover::after,
+      .info-tip:focus-visible::after {
+        transform: translateX(0) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-wrap">
+    <div class="header-content">
+      <div class="header-badge">Wealth Planner</div>
+      <h1>Dividend <span>Passive Income</span> Calculator</h1>
+      <p>Project your portfolio growth and monthly dividend income over time</p>
+    </div>
+  </div>
+
+  <main>
+    <div class="toolbar section-reveal" aria-label="Settings">
+      <div class="toolbar-group">
+        <label for="currency">Currency</label>
+        <select id="currency" aria-label="Select currency">
+          <option value="USD">USD ($)</option>
+          <option value="SGD">SGD (S$)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+          <option value="AUD">AUD (A$)</option>
+          <option value="MYR">MYR (RM)</option>
+          <option value="HKD">HKD (HK$)</option>
+        </select>
+      </div>
+      <div class="toolbar-group">
+        <button type="button" class="toolbar-btn" id="darkModeBtn" aria-label="Toggle dark mode">🌙 Dark</button>
+        <button type="button" class="toolbar-btn" id="shareBtn">Share</button>
+        <button type="button" class="toolbar-btn toolbar-btn--gold" id="exportBtn">Export PDF</button>
+      </div>
+    </div>
+
+    <section class="panel panel--gold section-reveal" aria-label="Investment parameters">
+      <div class="panel-title">Adjust your plan</div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span class="control-label-left">
+            Monthly Investment
+            <span class="info-tip" tabindex="0" data-tip="How much you invest each month into dividend stocks or ETFs.">i</span>
+          </span>
+          <span class="control-value" id="monthlyDisplay">$500</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="monthly" min="50" max="5000" step="50" value="500" aria-label="Monthly investment">
+        </div>
+        <div class="range-labels"><span id="monthlyMin">$50</span><span id="monthlyMax">$5,000</span></div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span class="control-label-left">
+            Annual Return Rate
+            <span class="info-tip" tabindex="0" data-tip="Total expected annual growth of your portfolio — includes both price appreciation and dividends reinvested. Typical range: 6–10% for broad market ETFs.">i</span>
+          </span>
+          <span class="control-value" id="rateDisplay">7%</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="rate" min="1" max="20" step="0.5" value="7" aria-label="Annual return rate">
+        </div>
+        <div class="range-labels"><span>1%</span><span>20%</span></div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span class="control-label-left">
+            Dividend Yield
+            <span class="info-tip" tabindex="0" data-tip="The % of your portfolio paid out as dividends each year. Used to calculate your monthly passive income. Example: 4% yield on $100,000 = $4,000/year ($333/month).">i</span>
+          </span>
+          <span class="control-value" id="yieldDisplay">4%</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="yield" min="0.5" max="12" step="0.5" value="4" aria-label="Dividend yield">
+        </div>
+        <div class="range-labels"><span>0.5%</span><span>12%</span></div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span class="control-label-left">
+            Investment Period
+            <span class="info-tip" tabindex="0" data-tip="How many years you plan to keep investing before living off the dividends.">i</span>
+          </span>
+          <span class="control-value" id="yearsDisplay">20 years</span>
+        </div>
+        <div class="slider-wrap">
+          <input type="range" id="years" min="1" max="40" step="1" value="20" aria-label="Investment period in years">
+        </div>
+        <div class="range-labels"><span>1 yr</span><span>40 yrs</span></div>
+      </div>
+
+      <div class="controls-footer">
+        <button type="button" class="reset-btn" id="resetBtn">↺ Reset to Default</button>
+      </div>
+    </section>
+
+    <div id="exportArea">
+      <section class="cards section-reveal" aria-label="Summary">
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <div class="card-label">Total Portfolio Value</div>
+          <div class="card-value" id="portfolioValue">$0</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🏦</div>
+          <div class="card-label">Total Invested</div>
+          <div class="card-value" id="totalInvested">$0</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">🚀</div>
+          <div class="card-label">Total Growth</div>
+          <div class="card-value" id="totalGrowth">$0</div>
+        </div>
+        <div class="card">
+          <div class="card-icon">💵</div>
+          <div class="card-label">Monthly Passive Income</div>
+          <div class="card-value" id="monthlyIncome">$0</div>
+        </div>
+      </section>
+
+      <section class="panel panel--emerald section-reveal">
+        <div class="panel-title panel-title--emerald">Portfolio Growth vs. Amount Invested</div>
+        <div class="chart-wrapper">
+          <canvas id="growthChart"></canvas>
+        </div>
+      </section>
+
+      <section class="panel panel--gold section-reveal">
+        <div class="panel-title">Year-by-Year Breakdown</div>
+        <div class="table-scroll">
+          <table class="breakdown-table" id="breakdownTable">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Total Invested</th>
+                <th>Portfolio Value</th>
+                <th>Growth</th>
+                <th>Monthly Income</th>
+              </tr>
+            </thead>
+            <tbody id="breakdownBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>If this tool helped you, buy me a coffee!</p>
+    <a class="bmc-btn" href="https://buymeacoffee.com/daylen" target="_blank" rel="noopener noreferrer">
+      <span class="bmc-emoji" aria-hidden="true">☕</span>
+      Buy Me a Coffee
+    </a>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const DEFAULTS = { monthly: 500, rate: 7, yield: 4, years: 20, currency: 'USD' };
+
+    let fmt = null;
+    let fmtDec = null;
+    let chart = null;
+    let animators = {};
+    const displayState = { portfolioValue: 0, totalInvested: 0, totalGrowth: 0, monthlyIncome: 0 };
+
+    const monthlySlider = document.getElementById('monthly');
+    const rateSlider = document.getElementById('rate');
+    const yieldSlider = document.getElementById('yield');
+    const yearsSlider = document.getElementById('years');
+    const currencySelect = document.getElementById('currency');
+    const sliders = [monthlySlider, rateSlider, yieldSlider, yearsSlider];
+
+    function makeFormatters(currency) {
+      fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 0 });
+      fmtDec = new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 2 });
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    function calculate(monthly, annualRate, dividendYield, years) {
+      const monthlyRate = Math.pow(1 + annualRate / 100, 1 / 12) - 1;
+      const labels = [];
+      const portfolioData = [];
+      const investedData = [];
+      const yearlyRows = [];
+
+      let balance = 0;
+      const totalMonths = years * 12;
+
+      for (let m = 1; m <= totalMonths; m++) {
+        balance = balance * (1 + monthlyRate) + monthly;
+        if (m % 12 === 0) {
+          const yr = m / 12;
+          const invested = monthly * m;
+          const growth = balance - invested;
+          const monthlyIncome = balance * (dividendYield / 100) / 12;
+          labels.push('Year ' + yr);
+          portfolioData.push(Math.round(balance));
+          investedData.push(invested);
+          yearlyRows.push({ year: yr, invested, portfolio: balance, growth, monthlyIncome });
+        }
+      }
+
+      const totalInvested = monthly * totalMonths;
+      return {
+        labels, portfolioData, investedData, yearlyRows,
+        portfolioValue: balance,
+        totalInvested,
+        totalGrowth: balance - totalInvested,
+        monthlyPassiveIncome: balance * (dividendYield / 100) / 12
+      };
+    }
+
+    function initChart() {
+      const ctx = document.getElementById('growthChart').getContext('2d');
+      const gridColor = document.documentElement.dataset.theme === 'dark' ? '#334155' : '#f7f4ef';
+      const tickColor = document.documentElement.dataset.theme === 'dark' ? '#94a3b8' : '#6b7280';
+
+      chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Portfolio Value',
+              data: [],
+              backgroundColor: 'rgba(201, 162, 39, 0.9)',
+              borderColor: '#c9a227',
+              borderWidth: 1,
+              borderRadius: 0
+            },
+            {
+              label: 'Amount Invested',
+              data: [],
+              backgroundColor: 'rgba(30, 41, 59, 0.75)',
+              borderColor: '#1e293b',
+              borderWidth: 1,
+              borderRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 600, easing: 'easeOutQuart' },
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { usePointStyle: true, pointStyle: 'rect', padding: 14, font: { size: 12, weight: '600' }, color: tickColor }
+            },
+            tooltip: {
+              callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt.format(ctx.raw) }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              border: { color: gridColor },
+              ticks: { maxRotation: 45, font: { size: 11 }, color: tickColor }
+            },
+            y: {
+              beginAtZero: true,
+              border: { color: gridColor },
+              grid: { color: gridColor },
+              ticks: {
+                color: tickColor,
+                callback: v => {
+                  const sym = fmt.format(0).replace(/[\d.,\s]/g, '').trim() || '$';
+                  return sym + (v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function setSliderFill(slider) {
+      const min = +slider.min, max = +slider.max, val = +slider.value;
+      slider.style.setProperty('--pct', ((val - min) / (max - min) * 100) + '%');
+    }
+
+    function renderTable(rows) {
+      const tbody = document.getElementById('breakdownBody');
+      tbody.innerHTML = rows.map(r => `
+        <tr>
+          <td>Year ${r.year}</td>
+          <td>${fmt.format(r.invested)}</td>
+          <td>${fmt.format(r.portfolio)}</td>
+          <td class="col-growth">${fmt.format(r.growth)}</td>
+          <td class="col-income">${fmtDec.format(r.monthlyIncome)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function animateValue(id, target, decimals) {
+      const el = document.getElementById(id);
+      const start = displayState[id];
+      const diff = target - start;
+      if (Math.abs(diff) < 1) {
+        displayState[id] = target;
+        el.textContent = decimals ? fmtDec.format(target) : fmt.format(target);
+        el.classList.remove('counting');
+        return;
+      }
+      el.classList.add('counting');
+      const duration = 400;
+      const t0 = performance.now();
+      if (animators[id]) cancelAnimationFrame(animators[id]);
+
+      function step(now) {
+        const t = Math.min((now - t0) / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 3);
+        const current = start + diff * eased;
+        displayState[id] = current;
+        el.textContent = decimals ? fmtDec.format(current) : fmt.format(current);
+        if (t < 1) animators[id] = requestAnimationFrame(step);
+        else {
+          displayState[id] = target;
+          el.textContent = decimals ? fmtDec.format(target) : fmt.format(target);
+          el.classList.remove('counting');
+          delete animators[id];
+        }
+      }
+      animators[id] = requestAnimationFrame(step);
+    }
+
+    function bump(el) {
+      el.classList.remove('bump');
+      void el.offsetWidth;
+      el.classList.add('bump');
+    }
+
+    function updateRangeLabels() {
+      document.getElementById('monthlyMin').textContent = fmt.format(+monthlySlider.min);
+      document.getElementById('monthlyMax').textContent = fmt.format(+monthlySlider.max);
+    }
+
+    function update(animate) {
+      const monthly = +monthlySlider.value;
+      const rate = +rateSlider.value;
+      const divYield = +yieldSlider.value;
+      const years = +yearsSlider.value;
+
+      sliders.forEach(setSliderFill);
+
+      document.getElementById('monthlyDisplay').textContent = fmt.format(monthly);
+      document.getElementById('rateDisplay').textContent = rate + '%';
+      document.getElementById('yieldDisplay').textContent = divYield + '%';
+      document.getElementById('yearsDisplay').textContent = years + (years === 1 ? ' year' : ' years');
+
+      const result = calculate(monthly, rate, divYield, years);
+
+      if (animate) {
+        animateValue('portfolioValue', result.portfolioValue, false);
+        animateValue('totalInvested', result.totalInvested, false);
+        animateValue('totalGrowth', result.totalGrowth, false);
+        animateValue('monthlyIncome', result.monthlyPassiveIncome, true);
+      } else {
+        displayState.portfolioValue = result.portfolioValue;
+        displayState.totalInvested = result.totalInvested;
+        displayState.totalGrowth = result.totalGrowth;
+        displayState.monthlyIncome = result.monthlyPassiveIncome;
+        document.getElementById('portfolioValue').textContent = fmt.format(result.portfolioValue);
+        document.getElementById('totalInvested').textContent = fmt.format(result.totalInvested);
+        document.getElementById('totalGrowth').textContent = fmt.format(result.totalGrowth);
+        document.getElementById('monthlyIncome').textContent = fmtDec.format(result.monthlyPassiveIncome);
+      }
+
+      renderTable(result.yearlyRows);
+      chart.data.labels = result.labels;
+      chart.data.datasets[0].data = result.portfolioData;
+      chart.data.datasets[1].data = result.investedData;
+      chart.update(animate ? undefined : 'none');
+    }
+
+    function resetDefaults() {
+      monthlySlider.value = DEFAULTS.monthly;
+      rateSlider.value = DEFAULTS.rate;
+      yieldSlider.value = DEFAULTS.yield;
+      yearsSlider.value = DEFAULTS.years;
+      currencySelect.value = DEFAULTS.currency;
+      makeFormatters(DEFAULTS.currency);
+      updateRangeLabels();
+      update(true);
+      showToast('Reset to default values');
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.documentElement.dataset.theme === 'dark';
+      document.documentElement.dataset.theme = isDark ? 'light' : 'dark';
+      document.getElementById('darkModeBtn').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      chart.destroy();
+      initChart();
+      update(false);
+    }
+
+    async function shareResults() {
+      const monthly = fmt.format(+monthlySlider.value);
+      const income = fmtDec.format(displayState.monthlyIncome);
+      const years = yearsSlider.value;
+      const text = `My dividend plan: ${monthly}/mo for ${years} years → ${income}/mo passive income. Try it:`;
+      const url = window.location.href;
+
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: 'Dividend Calculator Results', text, url });
+          return;
+        } catch (e) { if (e.name === 'AbortError') return; }
+      }
+
+      try {
+        await navigator.clipboard.writeText(text + ' ' + url);
+        showToast('Results copied to clipboard!');
+      } catch {
+        showToast('Share: copy the URL from your browser');
+      }
+    }
+
+    async function exportPDF() {
+      const btn = document.getElementById('exportBtn');
+      btn.textContent = 'Generating…';
+      btn.disabled = true;
+
+      try {
+        const area = document.getElementById('exportArea');
+        const canvas = await html2canvas(area, {
+          scale: 2,
+          backgroundColor: document.documentElement.dataset.theme === 'dark' ? '#0c1220' : '#f7f4ef',
+          logging: false
+        });
+
+        const { jsPDF } = window.jspdf;
+        const imgW = canvas.width;
+        const imgH = canvas.height;
+        const pdfW = 210;
+        const pdfH = (imgH * pdfW) / imgW;
+        const pdf = new jsPDF({ orientation: pdfH > 297 ? 'portrait' : 'portrait', unit: 'mm', format: [pdfW, Math.max(pdfH, 297)] });
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdfW, pdfH);
+        pdf.save('dividend-calculator-results.pdf');
+        showToast('PDF downloaded!');
+      } catch {
+        showToast('Export failed — try again');
+      } finally {
+        btn.textContent = 'Export PDF';
+        btn.disabled = false;
+      }
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.documentElement.dataset.theme = 'dark';
+        document.getElementById('darkModeBtn').textContent = '☀️ Light';
+      }
+    }
+
+    function boot() {
+      initTheme();
+      makeFormatters(currencySelect.value);
+      initChart();
+      sliders.forEach(setSliderFill);
+      updateRangeLabels();
+      update(false);
+
+      sliders.forEach(el => {
+        el.addEventListener('input', () => {
+          bump(el.closest('.control-group').querySelector('.control-value'));
+          update(true);
+        });
+      });
+
+      currencySelect.addEventListener('change', () => {
+        makeFormatters(currencySelect.value);
+        updateRangeLabels();
+        update(false);
+        showToast('Currency: ' + currencySelect.value);
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', resetDefaults);
+      document.getElementById('darkModeBtn').addEventListener('click', toggleDarkMode);
+      document.getElementById('shareBtn').addEventListener('click', shareResults);
+      document.getElementById('exportBtn').addEventListener('click', exportPDF);
+    }
+
+    boot();
+  </script>
+</body>
+</html>
